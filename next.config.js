@@ -259,6 +259,11 @@ const nextConfig = {
           source: '/feed',
           destination: '/rss/feed.xml',
           permanent: true
+        },
+        {
+          source: '/about',
+          destination: 'https://antarxly.com/about/',
+          permanent: true
         }
       ]
     },
