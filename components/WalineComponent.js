@@ -15,9 +15,14 @@ const WalineComponent = (props) => {
   const containerRef = createRef()
   const router = useRouter()
 
+  const getCommentPath = () => {
+    const pathname = window.location.pathname.replace(/\/$/, '') || '/'
+    return `/${window.location.hostname}${pathname}`
+  }
+
   const updateWaline = url => {
     if (url !== path && waline) {
-      waline.update(props)
+      waline.update({ ...props, path: getCommentPath() })
     }
   }
 
@@ -27,6 +32,7 @@ const WalineComponent = (props) => {
         ...props,
         el: containerRef.current,
         serverURL: siteConfig('COMMENT_WALINE_SERVER_URL'),
+        path: getCommentPath(),
         lang: siteConfig('LANG'),
         reaction: true,
         dark: 'html.dark',
