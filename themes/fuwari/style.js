@@ -1,8 +1,10 @@
 /* eslint-disable react/no-unknown-property */
 import CONFIG from './config'
+import { siteConfig } from '@/lib/config'
 import { themeConsoleStyle } from '@/lib/themeConsoleStyle'
 
 const Style = () => {
+  const hue = siteConfig('FUWARI_THEME_COLOR_HUE', 52, CONFIG)
   return <style jsx global>{`
     #theme-fuwari {
       --fuwari-bg: #f3f4f8;
@@ -10,8 +12,8 @@ const Style = () => {
       --fuwari-surface: #ffffff;
       --fuwari-muted: #72767d;
       --fuwari-text: #232a37;
-      --fuwari-primary: #b8a320;
-      --fuwari-primary-soft: rgba(184, 163, 32, 0.14);
+      --fuwari-primary: hsl(${hue}, 85%, 62%);
+      --fuwari-primary-soft: hsla(${hue}, 85%, 62%, 0.14);
       --fuwari-border: #e9e8df;
       --fuwari-gradient: linear-gradient(135deg, var(--fuwari-primary) 0%, color-mix(in oklab, var(--fuwari-primary) 70%, #ffffff) 100%);
     }
@@ -22,8 +24,8 @@ const Style = () => {
       --fuwari-surface: #171f2c;
       --fuwari-muted: #9ca3af;
       --fuwari-text: #f3f4f6;
-      --fuwari-primary: #d3bf53;
-      --fuwari-primary-soft: rgba(211, 191, 83, 0.2);
+      --fuwari-primary: hsl(${hue}, 85%, 62%);
+      --fuwari-primary-soft: hsla(${hue}, 85%, 62%, 0.2);
       --fuwari-border: #283446;
       --fuwari-gradient: linear-gradient(135deg, var(--fuwari-primary) 0%, color-mix(in oklab, var(--fuwari-primary) 70%, #ffffff) 100%);
     }
