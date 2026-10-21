@@ -3,6 +3,8 @@ import getConfig from 'next/config'
 import dynamic from 'next/dynamic'
 import { useRouter } from 'next/router'
 import { getQueryParam, getQueryVariable, isBrowser } from '../lib/utils'
+import { fuwariLayouts } from './fuwari/layouts'
+import fuwariConfig from './fuwari/config'
 
 // 在next.config.js中扫描所有主题
 export const { THEMES = [] } = getConfig()?.publicRuntimeConfig || {}
@@ -77,6 +79,14 @@ const normalizeThemeName = themeValue => {
   if (!firstTheme) return BLOG.THEME
   return THEMES.includes(firstTheme) ? firstTheme : BLOG.THEME
 }
+
+export const resolveThemeName = (queryTheme, fallbackTheme) =>
+  normalizeThemeName(queryTheme || fallbackTheme || BLOG.THEME)
+
+// The small configuration object is available during SSR and hydration without
+// importing the theme's rendering dependencies.
+export const getInitialThemeConfig = theme =>
+  normalizeThemeName(theme) === 'fuwari' ? fuwariConfig : null
 
 const getFallbackThemeName = themeName => {
   const preferred = normalizeThemeName(BLOG.THEME)
@@ -155,6 +165,8 @@ async function resolveThemeLayout(themeName, layoutName, emptyLayout) {
  */
 export const getThemeConfig = async themeQuery => {
   const themeName = normalizeThemeName(themeQuery)
+  const initialConfig = getInitialThemeConfig(themeName)
+  if (initialConfig) return initialConfig
   let cfg = await importThemeConfig(themeName)
   if (cfg) {
     return cfg
@@ -178,10 +190,7 @@ export const getThemeConfig = async themeQuery => {
  */
 const getCurrentTheme = (router, fallbackTheme) => {
   const queryTheme = getQueryParam(router?.asPath, 'theme')
-  if (queryTheme) {
-    return normalizeThemeName(queryTheme)
-  }
-  return normalizeThemeName(fallbackTheme || BLOG.THEME)
+  return resolveThemeName(queryTheme, fallbackTheme)
 }
 
 /**
@@ -191,6 +200,7 @@ const getCurrentTheme = (router, fallbackTheme) => {
  */
 export const getBaseLayoutByTheme = theme => {
   const normalizedTheme = normalizeThemeName(theme)
+  if (normalizedTheme === 'fuwari') return fuwariLayouts.LayoutBase
   if (baseLayoutCache.has(normalizedTheme)) {
     return baseLayoutCache.get(normalizedTheme)
   }
@@ -222,6 +232,10 @@ export const DynamicLayout = props => {
 export const useLayoutByTheme = ({ layoutName, theme }) => {
   const router = useRouter()
   const themeQuery = getCurrentTheme(router, theme)
+  if (themeQuery === 'fuwari') {
+    scheduleFixThemeDOM(themeQuery === BLOG.THEME ? 80 : 240)
+    return fuwariLayouts[layoutName] || fuwariLayouts.LayoutSlug
+  }
   const cacheKey = `${themeQuery}:${layoutName}`
 
   if (layoutByThemeCache.has(cacheKey)) {

@@ -8,7 +8,7 @@ import '@/styles/notion.css' //  重写部分notion样式
 
 import useAdjustStyle from '@/hooks/useAdjustStyle'
 import { GlobalContextProvider } from '@/lib/global'
-import { getBaseLayoutByTheme } from '@/themes/theme'
+import { getBaseLayoutByTheme, resolveThemeName } from '@/themes/theme'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useMemo } from 'react'
 import { getQueryParam } from '../lib/utils'
@@ -47,7 +47,7 @@ const MyApp = ({ Component, pageProps }) => {
   const notionTheme = pageProps?.NOTION_CONFIG?.THEME
   const configTheme = BLOG.THEME
   const theme = useMemo(() => {
-    return queryTheme || notionTheme || configTheme
+    return resolveThemeName(queryTheme, notionTheme || configTheme)
   }, [queryTheme, notionTheme, configTheme])
 
   useEffect(() => {
