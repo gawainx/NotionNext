@@ -22,6 +22,10 @@ jest.mock('@/blog.config', () => ({
   ...jest.requireActual('@/blog.config'), THEME: 'fuwari'
 }))
 jest.mock('@clerk/nextjs', () => ({ useUser: jest.fn() }))
+jest.mock('@/themes/theme', () => {
+  const actual = jest.requireActual('@/themes/theme')
+  return { ...actual, getThemeConfig: jest.fn(actual.getThemeConfig) }
+})
 jest.mock('@/themes/simple', () => ({ THEME_CONFIG: { SIMPLE_ONLY: true } }))
 jest.mock('@/lib/utils/lang', () => ({
   generateLocaleDict: () => ({}), initLocale: jest.fn(), redirectUserLang: jest.fn()
@@ -97,7 +101,7 @@ it('uses the new Notion theme immediately when page props change', async () => {
 
 it('ignores an obsolete configuration response after switching themes', async () => {
   let finishOldRequest
-  jest.spyOn(themeModule, 'getThemeConfig').mockImplementation(() =>
+  themeModule.getThemeConfig.mockImplementationOnce(() =>
     new Promise(resolve => { finishOldRequest = resolve })
   )
   const { rerender } = render(
