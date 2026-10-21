@@ -11,6 +11,8 @@ export const fuwariLayouts = {
   LayoutSearch: dynamic(() => import('./index').then(m => m.LayoutSearch)),
   LayoutArchive: dynamic(() => import('./index').then(m => m.LayoutArchive)),
   Layout404: dynamic(() => import('./index').then(m => m.Layout404)),
-  LayoutCategoryIndex: dynamic(() => import('./index').then(m => m.LayoutCategoryIndex)),
+  LayoutCategoryIndex: dynamic(() =>
+    import('./index').then(m => m.LayoutCategoryIndex)
+  ),
   LayoutTagIndex: dynamic(() => import('./index').then(m => m.LayoutTagIndex))
 }

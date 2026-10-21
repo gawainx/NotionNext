@@ -19,7 +19,8 @@ jest.mock('next/config', () => () => ({
 }))
 jest.mock('next/router', () => ({ useRouter: jest.fn() }))
 jest.mock('@/blog.config', () => ({
-  ...jest.requireActual('@/blog.config'), THEME: 'fuwari'
+  ...jest.requireActual('@/blog.config'),
+  THEME: 'fuwari'
 }))
 jest.mock('@clerk/nextjs', () => ({ useUser: jest.fn() }))
 jest.mock('@/themes/theme', () => {
@@ -28,7 +29,9 @@ jest.mock('@/themes/theme', () => {
 })
 jest.mock('@/themes/simple', () => ({ THEME_CONFIG: { SIMPLE_ONLY: true } }))
 jest.mock('@/lib/utils/lang', () => ({
-  generateLocaleDict: () => ({}), initLocale: jest.fn(), redirectUserLang: jest.fn()
+  generateLocaleDict: () => ({}),
+  initLocale: jest.fn(),
+  redirectUserLang: jest.fn()
 }))
 
 const events = { on: jest.fn(), off: jest.fn() }
@@ -40,15 +43,21 @@ beforeEach(() => {
 
 function ConfigProbe() {
   const { THEME_CONFIG } = useGlobal()
-  return <div data-testid='config'>{JSON.stringify({
-    hasFuwariConfig: THEME_CONFIG === CONFIG,
-    menu: siteConfig('FUWARI_MENU_INDEX')
-  })}</div>
+  return (
+    <div data-testid='config'>
+      {JSON.stringify({
+        hasFuwariConfig: THEME_CONFIG === CONFIG,
+        menu: siteConfig('FUWARI_MENU_INDEX')
+      })}
+    </div>
+  )
 }
 
 it('renders Fuwari configuration on the server and preserves Notion overrides', () => {
   const html = renderToString(
-    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari', FUWARI_MENU_INDEX: false }}>
+    <GlobalContextProvider
+      NOTION_CONFIG={{ THEME: 'fuwari', FUWARI_MENU_INDEX: false }}
+    >
       <ConfigProbe />
     </GlobalContextProvider>
   )
@@ -80,37 +89,58 @@ it('reuses registered layouts and preserves missing-layout fallback', () => {
   rerender(<Probe name='LayoutIndex' />)
   rerender(<Probe name='LayoutSignIn' />)
   expect(selected).toEqual([
-    fuwariLayouts.LayoutIndex, fuwariLayouts.LayoutIndex, fuwariLayouts.LayoutSlug
+    fuwariLayouts.LayoutIndex,
+    fuwariLayouts.LayoutIndex,
+    fuwariLayouts.LayoutSlug
   ])
   expect(getBaseLayoutByTheme('fuwari')).toBe(fuwariLayouts.LayoutBase)
 })
 
 it('uses the new Notion theme immediately when page props change', async () => {
   const { rerender } = render(
-    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari' }}><ConfigProbe /></GlobalContextProvider>
+    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari' }}>
+      <ConfigProbe />
+    </GlobalContextProvider>
   )
-  expect(screen.getByTestId('config')).toHaveTextContent('"hasFuwariConfig":true')
+  expect(screen.getByTestId('config')).toHaveTextContent(
+    '"hasFuwariConfig":true'
+  )
   // Changing to another theme must not expose the previous Fuwari config.
   await act(async () => {
     rerender(
-      <GlobalContextProvider NOTION_CONFIG={{ THEME: 'simple' }}><ConfigProbe /></GlobalContextProvider>
+      <GlobalContextProvider NOTION_CONFIG={{ THEME: 'simple' }}>
+        <ConfigProbe />
+      </GlobalContextProvider>
     )
   })
-  expect(screen.getByTestId('config')).toHaveTextContent('"hasFuwariConfig":false')
+  expect(screen.getByTestId('config')).toHaveTextContent(
+    '"hasFuwariConfig":false'
+  )
 })
 
 it('ignores an obsolete configuration response after switching themes', async () => {
   let finishOldRequest
-  themeModule.getThemeConfig.mockImplementationOnce(() =>
-    new Promise(resolve => { finishOldRequest = resolve })
+  themeModule.getThemeConfig.mockImplementationOnce(
+    () =>
+      new Promise(resolve => {
+        finishOldRequest = resolve
+      })
   )
   const { rerender } = render(
-    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'simple' }}><ConfigProbe /></GlobalContextProvider>
+    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'simple' }}>
+      <ConfigProbe />
+    </GlobalContextProvider>
   )
   rerender(
-    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari' }}><ConfigProbe /></GlobalContextProvider>
+    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari' }}>
+      <ConfigProbe />
+    </GlobalContextProvider>
   )
-  await act(async () => { finishOldRequest({ FUWARI_MENU_INDEX: false }) })
-  expect(screen.getByTestId('config')).toHaveTextContent('"hasFuwariConfig":true')
+  await act(async () => {
+    finishOldRequest({ FUWARI_MENU_INDEX: false })
+  })
+  expect(screen.getByTestId('config')).toHaveTextContent(
+    '"hasFuwariConfig":true'
+  )
   expect(screen.getByTestId('config')).toHaveTextContent('"menu":true')
 })

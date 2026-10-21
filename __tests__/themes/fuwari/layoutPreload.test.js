@@ -15,6 +15,8 @@ it('emits preload metadata for every Fuwari layout without eager imports', () =>
     caller: { name: 'test', isServer: false, isDev: false }
   })
   expect(code.match(/loadableGenerated:/g)).toHaveLength(9)
-  expect(code.match(/require\.resolveWeak\(['"]\.\/index['"]\)/g)).toHaveLength(9)
+  expect(code.match(/require\.resolveWeak\(['"]\.\/index['"]\)/g)).toHaveLength(
+    9
+  )
   expect(code).not.toMatch(/import .* from ['"]\.\/index['"]/)
 })
