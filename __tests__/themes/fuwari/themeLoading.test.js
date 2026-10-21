@@ -12,6 +12,7 @@ import {
 } from '@/themes/theme'
 import { fuwariLayouts } from '@/themes/fuwari/layouts'
 import CONFIG from '@/themes/fuwari/config'
+import * as themeModule from '@/themes/theme'
 
 jest.mock('next/config', () => () => ({
   publicRuntimeConfig: { THEMES: ['fuwari', 'simple', 'example'] }
@@ -21,6 +22,7 @@ jest.mock('@/blog.config', () => ({
   ...jest.requireActual('@/blog.config'), THEME: 'fuwari'
 }))
 jest.mock('@clerk/nextjs', () => ({ useUser: jest.fn() }))
+jest.mock('@/themes/simple', () => ({ THEME_CONFIG: { SIMPLE_ONLY: true } }))
 jest.mock('@/lib/utils/lang', () => ({
   generateLocaleDict: () => ({}), initLocale: jest.fn(), redirectUserLang: jest.fn()
 }))
@@ -91,4 +93,20 @@ it('uses the new Notion theme immediately when page props change', async () => {
     )
   })
   expect(screen.getByTestId('config')).toHaveTextContent('"hasFuwariConfig":false')
+})
+
+it('ignores an obsolete configuration response after switching themes', async () => {
+  let finishOldRequest
+  jest.spyOn(themeModule, 'getThemeConfig').mockImplementation(() =>
+    new Promise(resolve => { finishOldRequest = resolve })
+  )
+  const { rerender } = render(
+    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'simple' }}><ConfigProbe /></GlobalContextProvider>
+  )
+  rerender(
+    <GlobalContextProvider NOTION_CONFIG={{ THEME: 'fuwari' }}><ConfigProbe /></GlobalContextProvider>
+  )
+  await act(async () => { finishOldRequest({ FUWARI_MENU_INDEX: false }) })
+  expect(screen.getByTestId('config')).toHaveTextContent('"hasFuwariConfig":true')
+  expect(screen.getByTestId('config')).toHaveTextContent('"menu":true')
 })
